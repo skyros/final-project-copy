@@ -110,6 +110,6 @@ venv.bak/
 # vscode
 .vscode
 
-# debuf/dev
+# debug/dev
 junk*
 .pre-commit-config*
