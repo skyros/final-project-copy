@@ -9,6 +9,14 @@ pytest-cov = "*"
 
 [packages]
 csci-utils = {editable = true,git = "https://github.com/csci-e-29/2020fa-csci-utils-skyros"}
+luigi = "*"
+geopandas = "*"
+dask = {extras = ["dataframe"], version = "*"}
+fastparquet = "*"
+s3fs = "*"
+matplotlib = "*"
+descartes = "*"
+bokeh = "*"
 
 [requires]
 python_version = "3.7"
