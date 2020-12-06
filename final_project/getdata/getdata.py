@@ -1,3 +1,4 @@
+from csci_utils.luigi.dask.target import CSVTarget
 from csci_utils.luigi.task import TargetOutput
 from luigi import ExternalTask
 
@@ -40,10 +41,20 @@ class DailyCovidData(ExternalTask):
 class StatePopulation(ExternalTask):
 
     output = TargetOutput(
-        file_pattern="data/to_s3_data/nst-est2019-popchg2010_2019", ext=".csv"
+        file_pattern="data/to_s3_data/state_data/",
+        ext="",
+        target_class=CSVTarget,
+        flag=None,
+        glob="*.csv",
     )
 
 
 class ShapeFiles(ExternalTask):
 
-    output = TargetOutput(file_pattern="data/to_s3_data/cb_2019_us_state_20m", ext="")
+    output = TargetOutput(
+        file_pattern="data/to_s3_data/covid_data/",
+        ext="",
+        target_class=CSVTarget,
+        flag=None,
+        glob="*.csv",
+    )
