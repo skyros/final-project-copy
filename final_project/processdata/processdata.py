@@ -1,11 +1,11 @@
 import os
 
-import geopandas as gpd
 from csci_utils.luigi.dask import ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
-from luigi import LocalTarget, Task
+from luigi import Task
 
 from ..getdata import DailyCovidData, ShapeFiles, StatePopulation
+from ..shapefiletarget import ShapeFileTarget
 
 
 class CondensedShapefile(Task):
@@ -15,16 +15,18 @@ class CondensedShapefile(Task):
     shapefile = Requirement(ShapeFiles)
     output = TargetOutput(
         file_pattern=os.path.join("data", "{task.__class__.__name__}"),
-        target_class=LocalTarget,
+        target_class=ShapeFileTarget,
         ext="",
     )
 
     def run(self):
-        gdf = gpd.read_file(self.input()["shapefile"].path)[
-            ["STATEFP", "NAME", "geometry"]
+        # print(self.input()["shapefile"])
+        gdf = self.input()["shapefile"].read_gpd()[
+            ["STATEFP", "STUSPS", "NAME", "geometry"]
         ]
-        gdf = gdf[gdf["STATEFP"].isin(contiguous_states)]
-        gdf.to_file(self.output().path)
+        gdf = gdf[gdf["STATEFP"].astype(int).isin(contiguous_states)]
+        print(gdf)
+        self.output().write_gpd(gdf)
 
 
 class CondensedStatePop(Task):
@@ -39,16 +41,27 @@ class CondensedStatePop(Task):
     )
 
     def run(self):
+        print(self.input()["populations"].__dict__)
         ddf = self.input()["populations"].read_dask(
             usecols=["STATE", "NAME", "POPESTIMATE2019"]
         )
         ddf = ddf[ddf["STATE"].isin(contiguous_states)]
-        self.output().write_dask(ddf, compression="gzip")
+        # self.output().write_dask(ddf, compression="gzip")
 
 
 class CleanedCovidData(Task):
     requires = Requires()
-    populations = Requirement(DailyCovidData)
+    covid_numbers = Requirement(DailyCovidData)
+    output = TargetOutput(
+        file_pattern=os.path.join("data", "{task.__class__.__name__}/"),
+        ext="",
+        target_class=ParquetTarget,
+        glob="*.parquet",
+    )
+
+    def run(self):
+        ddf = self.input()["covid_numbers"].read_dask()
+        print(ddf.columns)
 
 
 contiguous_states = [
