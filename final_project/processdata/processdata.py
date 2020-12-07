@@ -59,15 +59,16 @@ class CondensedStatePop(Task):
         # Select Only Rows From Contiguous States
         ddf = ddf[ddf["STATE"].isin(contiguous_states)]
 
+        # Rename Column for Merging
         ddf = ddf.rename(columns={"STATE": "STATEFP"})
-
-        print(ddf.head())
 
         # Save File
         self.output().write_dask(ddf, compression="gzip")
 
 
 class CleanedCovidData(Task):
+    """Selects Relevant Rows and Cleans Covid Data"""
+
     requires = Requires()
     covid_numbers = Requirement(DaskFSDailyCovidData)
     output = TargetOutput(
@@ -110,15 +111,45 @@ class CleanedCovidData(Task):
         # Rename fips
         ddf = ddf.rename(columns={"fips": "STATEFP"})
 
-        out = ddf
-
-        self.output().write_dask(out, compression="gzip")
+        self.output().write_dask(ddf, compression="gzip")
 
 
-class MergedData(Task):
+class PopulationStats(Task):
+    """Normalizes Statistics to State Population"""
+
     requires = Requires()
     covid_data = Requirement(CleanedCovidData)
     state_populations = Requirement(CondensedStatePop)
+
+    output = TargetOutput(
+        file_pattern=os.path.join("data", "{task.__class__.__name__}/"),
+        ext="",
+        target_class=ParquetTarget,
+        glob="*.parquet",
+    )
+
+    def run(self):
+        # Load DataFrames
+        covid_df = self.input()["covid_data"].read_dask()
+        pop_df = self.input()["state_populations"].read_dask()
+
+        # Merge DataFrames
+        ddf = covid_df.merge(pop_df)
+
+        # Calculate New Statistic for Deaths per 100 thousand people
+        ddf["deathsp100k"] = ddf.apply(
+            lambda x: x["death"] / x["POPESTIMATE2019"] * 100000, axis=1
+        )
+
+        # Save DataFrame
+        self.output().write_dask(ddf, compression="gzip")
+
+
+class MergedData(Task):
+    """Merges the normalized statistics with the GeoPandas shapefile"""
+
+    requires = Requires()
+    data = Requirement(PopulationStats)
     shapefile = Requirement(CondensedShapefile)
 
     output = TargetOutput(
@@ -130,7 +161,7 @@ class MergedData(Task):
     def run(self):
         # Load DataFrames
         gdf = self.input()["shapefile"].read_gpd()
-        ddf = self.input()["covid_data"].read_dask()
+        ddf = self.input()["data"].read_dask()
 
         # Take only the most recent date
         ddf = ddf[ddf["date"] == ddf["date"].max()]
