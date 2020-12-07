@@ -8,14 +8,14 @@ from bokeh.plotting import figure
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import LocalTarget, Task
 
-from ..preparedata import CondensedShapefile
+from ..processdata import MergedData
 
 
 class VisualizedData(Task):
     """Takes a GeoJSON file and visualizes the data using Bokeh"""
 
     requires = Requires()
-    data = Requirement(CondensedShapefile)
+    data = Requirement(MergedData)
     output = TargetOutput(
         file_pattern=os.path.join("data", "{task.__class__.__name__}"),
         ext=".html",
