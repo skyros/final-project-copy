@@ -28,6 +28,9 @@ class CondensedShapefile(Task):
         # Select rows only of contiguous states
         gdf = gdf[gdf["STATEFP"].astype(int).isin(contiguous_states)]
 
+        # Convert StateFP to int
+        gdf[["STATEFP"]] = gdf[["STATEFP"]].astype(int)
+
         # Save file
         self.output().write_gpd(gdf)
 
@@ -53,6 +56,10 @@ class CondensedStatePop(Task):
 
         # Select Only Rows From Contiguous States
         ddf = ddf[ddf["STATE"].isin(contiguous_states)]
+
+        ddf = ddf.rename(columns={"STATE": "STATEFP"})
+
+        print(ddf.head())
 
         # Save File
         self.output().write_dask(ddf, compression="gzip")
@@ -91,12 +98,18 @@ class CleanedCovidData(Task):
             parse_dates=["date"], usecols=columns, dtype={"death": "float64"}
         )
 
+        # Fill numerical NAs and convert to int
         ddf = ddf.fillna(value={col: 0 for col in numcols})
         ddf[numcols] = ddf[numcols].astype(int)
 
+        # Select only contiguous states
         ddf = ddf[ddf["fips"].isin(contiguous_states)]
 
+        # Rename fips
+        ddf = ddf.rename(columns={"fips": "STATEFP"})
+
         out = ddf
+
         self.output().write_dask(out, compression="gzip")
 
 
