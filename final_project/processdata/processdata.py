@@ -80,11 +80,24 @@ class CleanedCovidData(Task):
             "fips",
         ]
 
+        numcols = [
+            "hospitalizedCurrently",
+            "inIcuCurrently",
+            "onVentilatorCurrently",
+            "death",
+        ]
+
         ddf = self.input()["covid_numbers"].read_dask(
-            usecols=columns, dtype={"death": "float64"}
+            parse_dates=["date"], usecols=columns, dtype={"death": "float64"}
         )
 
-        print(ddf.head())
+        ddf = ddf.fillna(value={col: 0 for col in numcols})
+        ddf[numcols] = ddf[numcols].astype(int)
+
+        ddf = ddf[ddf["fips"].isin(contiguous_states)]
+
+        out = ddf
+        self.output().write_dask(out, compression="gzip")
 
 
 contiguous_states = [
