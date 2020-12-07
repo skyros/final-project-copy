@@ -1,5 +1,7 @@
 import os
 
+import geopandas as gp
+import pandas as pd
 from csci_utils.luigi.dask import ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import Task
@@ -111,6 +113,43 @@ class CleanedCovidData(Task):
         out = ddf
 
         self.output().write_dask(out, compression="gzip")
+
+
+class MergedData(Task):
+    requires = Requires()
+    covid_data = Requirement(CleanedCovidData)
+    state_populations = Requirement(CondensedStatePop)
+    shapefile = Requirement(CondensedShapefile)
+
+    output = TargetOutput(
+        file_pattern=os.path.join("data", "{task.__class__.__name__}"),
+        target_class=ShapeFileTarget,
+        ext="",
+    )
+
+    def run(self):
+        # Load DataFrames
+        gdf = self.input()["shapefile"].read_gpd()
+        ddf = self.input()["covid_data"].read_dask()
+
+        # Take only the most recent date
+        ddf = ddf[ddf["date"] == ddf["date"].max()]
+
+        # Unfortunately have to drop to Pandas here because dask does not play well with geopandas
+        # However, most of the dataframe has been reduced so we have cut down on compute time
+        pdf = ddf.compute()
+
+        # Merge Dataframes
+        df = pd.merge(pdf, gdf)
+
+        # Converting date back to str
+        df[["date"]] = df[["date"]].astype(str)
+
+        # Converting dataframe to geodataframe
+        gdf = gp.GeoDataFrame(df)
+
+        # Save Geodataframe
+        self.output().write_gpd(gdf)
 
 
 contiguous_states = [
