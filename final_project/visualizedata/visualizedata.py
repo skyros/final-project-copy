@@ -12,9 +12,9 @@ from ..processdata import MergedData
 
 
 class VisualizedData(Task):
-    """Takes a GeoJSON shapefile and visualizes the data using Bokeh"""
+    """Takes a GeoPandas shapefile and visualizes the data using Bokeh"""
 
-    sort_by = "death"
+    sort_by = "deathsp100"
 
     requires = Requires()
     data = Requirement(MergedData)
@@ -34,16 +34,24 @@ class VisualizedData(Task):
 
         gjdf = GeoJSONDataSource(geojson=gjdf)
 
-        p = figure()
+        p = figure(
+            title="Total Covid Deaths Per 100 Thousand Population",
+            x_axis_location=None,
+            y_axis_location=None,
+        )
+        p.grid.grid_line_color = None
+
         color_mapper = LinearColorMapper(palette=palette[8], low=low, high=high)
         p.patches(
-            source=gjdf, fill_color={"field": self.sort_by, "transform": color_mapper}
+            source=gjdf,
+            fill_color={"field": self.sort_by, "transform": color_mapper},
+            line_color="black",
         )
         hovering = HoverTool()
         hovering.tooltips = [
             ("State", "@NAME"),
-            ("Number", "@STATEFP"),
             ("Covid-19 Deaths", "@death"),
+            ("Covid-19 Deaths per 100k", "@deathsp100"),
         ]
         p.add_tools(hovering)
         save(p, filename=self.output().path)
