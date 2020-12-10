@@ -138,7 +138,9 @@ class PopulationStats(Task):
 
         # Calculate New Statistic for Deaths per 100 thousand people
         ddf["deathsp100k"] = ddf.apply(
-            lambda x: x["death"] / x["POPESTIMATE2019"] * 100000, axis=1
+            lambda x: x["death"] / x["POPESTIMATE2019"] * 100000,
+            axis=1,
+            meta=(None, "float64"),
         )
 
         # Save DataFrame

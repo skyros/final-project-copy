@@ -1,7 +1,6 @@
 import os
 
-import geopandas as gpd
-from bokeh.io import save
+from bokeh.io import output_file, save
 from bokeh.models import GeoJSONDataSource, HoverTool, LinearColorMapper
 from bokeh.palettes import YlOrRd as palette
 from bokeh.plotting import figure
@@ -25,14 +24,13 @@ class VisualizedData(Task):
     )
 
     def run(self):
-        gdf = gpd.read_file(self.input()["data"].path)
+        gdf = self.input()["data"].read_gpd()
 
         low = gdf[self.sort_by].max()
         high = gdf[self.sort_by].min()
 
         gjdf = gdf.to_json()
-
-        gjdf = GeoJSONDataSource(geojson=gjdf)
+        source = GeoJSONDataSource(geojson=gjdf)
 
         p = figure(
             title="Total Covid Deaths Per 100 Thousand Population",
@@ -43,7 +41,7 @@ class VisualizedData(Task):
 
         color_mapper = LinearColorMapper(palette=palette[8], low=low, high=high)
         p.patches(
-            source=gjdf,
+            source=source,
             fill_color={"field": self.sort_by, "transform": color_mapper},
             line_color="black",
         )
@@ -54,4 +52,5 @@ class VisualizedData(Task):
             ("Covid-19 Deaths per 100k", "@deathsp100"),
         ]
         p.add_tools(hovering)
-        save(p, filename=self.output().path)
+        output_file(self.output().path)
+        save(p)
