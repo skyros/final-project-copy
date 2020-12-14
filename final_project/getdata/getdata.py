@@ -5,13 +5,18 @@ from csci_utils.luigi.dask.target import CSVTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import ExternalTask, LocalTarget, Task
 
-from ..utils import ShapeFileTarget
+from ..utils import LocalShapeFileTarget
 
 covid_path = os.path.join("data", "DailyCovidData")
 
 
 class DailyCovidData(Task):
-    """Saves a csv from the daily covid tracking API"""
+    """
+    Saves a csv from the daily covid tracking API
+
+    Data From The Covid Tracking Project at The Atlantic
+    https://covidtracking.com/
+    """
 
     API_Path = "https://api.covidtracking.com/v1/states/daily.csv"
 
@@ -43,10 +48,15 @@ class DaskFSDailyCovidData(Task):
 
 
 class StatePopulation(ExternalTask):
-    """ExternalTask that gets state population data"""
+    """
+    ExternalTask that gets state population data
+
+    Data From The US Census Bureau
+    https://www.census.gov/newsroom/press-kits/2019/national-state-estimates.html
+    """
 
     output = TargetOutput(
-        file_pattern="data/to_s3_data/state_data/",
+        file_pattern="data_s3/state_data/",
         ext="",
         target_class=CSVTarget,
         flag=None,
@@ -55,10 +65,15 @@ class StatePopulation(ExternalTask):
 
 
 class ShapeFiles(ExternalTask):
-    """ExternalTask that gets state shapefiles"""
+    """
+    ExternalTask that gets state shapefiles
+
+    Data From The US Census Bureau
+    https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html
+    """
 
     output = TargetOutput(
-        file_pattern="data/to_s3_data/cb_2019_us_state_20m",
+        file_pattern="data_s3/cb_2019_us_state_20m/",
         ext="",
-        target_class=ShapeFileTarget,
+        target_class=LocalShapeFileTarget,
     )
