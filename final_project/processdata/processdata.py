@@ -7,7 +7,7 @@ from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import Task
 
 from ..getdata import DaskFSDailyCovidData, ShapeFiles, StatePopulation
-from ..utils import ShapeFileTarget
+from ..utils import LocalShapeFileTarget
 
 
 class CondensedShapefile(Task):
@@ -17,7 +17,7 @@ class CondensedShapefile(Task):
     shapefile = Requirement(ShapeFiles)
     output = TargetOutput(
         file_pattern=os.path.join("data", "{task.__class__.__name__}"),
-        target_class=ShapeFileTarget,
+        target_class=LocalShapeFileTarget,
         ext="",
     )
 
@@ -156,7 +156,7 @@ class MergedData(Task):
 
     output = TargetOutput(
         file_pattern=os.path.join("data", "{task.__class__.__name__}"),
-        target_class=ShapeFileTarget,
+        target_class=LocalShapeFileTarget,
         ext="",
     )
 
