@@ -1,4 +1,5 @@
 data
+data_s3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -110,6 +111,6 @@ venv.bak/
 # vscode
 .vscode
 
-# debuf/dev
+# debug/dev
 junk*
 .pre-commit-config*
