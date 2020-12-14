@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 pytest-cov = "*"
+shapely = "*"
 
 [packages]
 csci-utils = {editable = true,git = "https://github.com/csci-e-29/2020fa-csci-utils-skyros"}
