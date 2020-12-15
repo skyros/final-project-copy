@@ -16,7 +16,7 @@ pipenv install
 ## Usage
 
 ```bash
-pipenv run python -m final_project [-i] [-o]
+pipenv run python -m final_project [-h] [-i] [-o]
 ```
 
 ## Major Packages Used

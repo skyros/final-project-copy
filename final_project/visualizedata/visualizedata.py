@@ -18,7 +18,7 @@ class VisualizedData(Task):
     requires = Requires()
     data = Requirement(MergedData)
     output = TargetOutput(
-        file_pattern=os.path.join("data", "{task.__class__.__name__}"),
+        file_pattern=os.path.join("{task.__class__.__name__}"),
         ext=".html",
         target_class=LocalTarget,
     )
