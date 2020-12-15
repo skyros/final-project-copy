@@ -1,4 +1,4 @@
-# Final Project - Geospacial Data Visualization Luigi, Dask, and Bokeh
+# Final Project - Geospatial Data Visualization Luigi, Dask, and Bokeh
 
 
 [![Build Status](https://travis-ci.com/skyros/2020fa-final-project-skyros.svg?token=18E2pJv6upgk4axV7LFv&branch=master)](https://travis-ci.com/skyros/2020fa-final-project-skyros)
@@ -18,6 +18,21 @@ pipenv install
 ```bash
 pipenv run python -m final_project [-i] [-o]
 ```
+
+## Major Packages Used
+
+### Packages
+
+- GeoPandas
+- Dask
+- Bokeh
+- Requests
+- CSCI-Utils
+
+### Dev-Packages
+
+- Pytest
+- Shapely
 
 ## Data
 - [The Covid Tracking Project at The Atlantic](https://covidtracking.com/) - Covid-19 Data
