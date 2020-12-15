@@ -37,7 +37,7 @@ class CondensedShapefile(Task):
         self.output().write_gpd(gdf)
 
 
-class CondensedStatePop(Task):
+class CleanedStatePop(Task):
     """Selects Relevent State Populations Columns/Rows and Saves Locally"""
 
     requires = Requires()
@@ -51,16 +51,19 @@ class CondensedStatePop(Task):
 
     def run(self):
 
+        numcols = ["POP", "state"]
+
         # Load Rows for State, State FP, and 2019 Population estimate
-        ddf = self.input()["populations"].read_dask(
-            usecols=["STATE", "NAME", "POPESTIMATE2019"]
-        )
+        ddf = self.input()["populations"].read_dask(columns=["POP", "NAME", "state"])
+
+        # Changes numcols to ints
+        ddf[numcols] = ddf[numcols].astype(int)
 
         # Select Only Rows From Contiguous States
-        ddf = ddf[ddf["STATE"].isin(contiguous_states)]
+        ddf = ddf[ddf["state"].isin(contiguous_states)]
 
         # Rename Column for Merging
-        ddf = ddf.rename(columns={"STATE": "STATEFP"})
+        ddf = ddf.rename(columns={"state": "STATEFP"})
 
         # Save File
         self.output().write_dask(ddf, compression="gzip")
@@ -119,7 +122,7 @@ class PopulationStats(Task):
 
     requires = Requires()
     covid_data = Requirement(CleanedCovidData)
-    state_populations = Requirement(CondensedStatePop)
+    state_populations = Requirement(CleanedStatePop)
 
     output = TargetOutput(
         file_pattern=os.path.join("data", "{task.__class__.__name__}/"),
@@ -138,7 +141,7 @@ class PopulationStats(Task):
 
         # Calculate New Statistic for Deaths per 100 thousand people
         ddf["deathsp100k"] = ddf.apply(
-            lambda x: x["death"] / x["POPESTIMATE2019"] * 100000,
+            lambda x: x["death"] / x["POP"] * 100000,
             axis=1,
             meta=(None, "float64"),
         )
