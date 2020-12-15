@@ -28,13 +28,12 @@ from final_project.processdata import (
     CondensedShapefile,
     CondensedStatePop,
     MergedData,
+    PopulationStats,
 )
 from final_project.utils import LocalShapeFileTarget
 from final_project.visualizedata import VisualizedData
 
 # remove, placeholders for later
-ExternalTask
-MergedData
 VisualizedData
 csv
 
@@ -156,7 +155,8 @@ class CleaningTests(TestCase):
         """Test Functionality of Covid Data Tasks"""
 
         with TemporaryDirectory() as tmp:
-            data_path = os.path.join(tmp, "covid_data")
+            api_path = os.path.join(tmp, "covid_data")
+            target_path = os.path.join(tmp, "local_covid_data")
 
             # Data to be Cleaned
             data = {
@@ -196,32 +196,38 @@ class CleaningTests(TestCase):
 
             # Writing Unlcean Data to File
             df = pd.DataFrame(data)
-            df.to_csv(data_path + ".csv")
+            df.to_csv(api_path + ".csv")
 
             # Immitating Response Object
             class MockedAPIResponse:
-                text = open(data_path + ".csv").read()
+                text = open(api_path + ".csv").read()
 
             # Mock API Response
             API_Response.return_value = MockedAPIResponse()
 
             class TestDailyCovidData(DailyCovidData):
                 output = TargetOutput(
-                    file_pattern=tmp,
+                    file_pattern=os.path.join(target_path, "0"),
                     ext=".csv",
                     target_class=LocalTarget,
                 )
 
             class TestDaskFSDailyCovidData(DaskFSDailyCovidData):
                 requires = Requires()
-                Requirement(TestDailyCovidData)
+                covid_data = Requirement(TestDailyCovidData)
+
                 output = TargetOutput(
-                    file_pattern=tmp + "/",
+                    file_pattern=target_path + "/",
                     ext="",
                     target_class=CSVTarget,
                     flag=None,
                     glob="*.csv",
                 )
+
+            build(
+                [TestDaskFSDailyCovidData()],
+                local_scheduler=True,
+            )
 
             class TestCleanedCovidData(CleanedCovidData):
 
@@ -245,3 +251,129 @@ class CleaningTests(TestCase):
             expected = pd.DataFrame(cleaned_data)
 
             pd.testing.assert_frame_equal(expected, actual)
+
+
+class MergingTests(TestCase):
+    def test_merge(self):
+        with TemporaryDirectory() as tmp:
+            # Making Testing File Directory
+            geo_file = os.path.join(tmp, "geo")
+            pop_file = os.path.join(tmp, "pop")
+            covid_file = os.path.join(tmp, "covid")
+            os.makedirs(geo_file)
+            os.makedirs(pop_file)
+            os.makedirs(covid_file)
+
+            # Unmerged Data
+            geo_data = {
+                "STATEFP": [10],
+                "STUSPS": ["DE"],
+                "geometry": [Polygon([(0, 0), (1, 1), (1, 0)])],
+            }
+
+            pop_data = {
+                "STATEFP": [10],
+                "NAME": ["Delaware"],
+                "POPESTIMATE2019": [300000],
+            }
+
+            covid_data = {
+                "date": [
+                    pd.to_datetime("2000-1-1"),
+                    pd.to_datetime("2000-1-2"),
+                ],
+                "death": [20, 30],
+                "STATEFP": [10, 10],
+            }
+
+            # Loading Data
+            geo_frame = gpd.GeoDataFrame(geo_data)
+            pop_frame = pd.DataFrame(pop_data)
+            covid_frame = pd.DataFrame(covid_data)
+
+            # Converting Non Geo Frames to Dask
+            pop_frame = dd.from_pandas(pop_frame, npartitions=1)
+            covid_frame = dd.from_pandas(covid_frame, npartitions=1)
+
+            # Saving to Files the Be Merged
+            geo_frame.to_file(geo_file)
+            pop_frame.to_parquet(pop_file)
+            covid_frame.to_parquet(covid_file)
+
+            # Luigi Tasks to Grab Test Data
+            class TestGeoFile(ExternalTask):
+                output = TargetOutput(
+                    file_pattern=geo_file,
+                    target_class=LocalShapeFileTarget,
+                    ext="",
+                )
+
+            class TestPopFile(ExternalTask):
+                output = TargetOutput(
+                    file_pattern=pop_file + "/",
+                    ext="",
+                    target_class=ParquetTarget,
+                    flag=None,
+                    glob="*.parquet",
+                )
+
+            class TestCovidFile(ExternalTask):
+                output = TargetOutput(
+                    file_pattern=covid_file + "/",
+                    ext="",
+                    target_class=ParquetTarget,
+                    flag=None,
+                    glob="*.parquet",
+                )
+
+            # Task to Test
+            class TestPopulationStats(PopulationStats):
+
+                requires = Requires()
+                covid_data = Requirement(TestCovidFile)
+                state_populations = Requirement(TestPopFile)
+
+                output = TargetOutput(
+                    file_pattern=os.path.join(tmp, "{task.__class__.__name__}/"),
+                    ext="",
+                    target_class=ParquetTarget,
+                    glob="*.parquet",
+                )
+
+            class TestMergedData(MergedData):
+                requires = Requires()
+                data = Requirement(TestPopulationStats)
+                shapefile = Requirement(TestGeoFile)
+
+                output = TargetOutput(
+                    file_pattern=os.path.join(tmp, "{task.__class__.__name__}"),
+                    target_class=LocalShapeFileTarget,
+                    ext="",
+                )
+
+            build(
+                [TestMergedData()],
+                local_scheduler=True,
+            )
+
+            expected_merged_data = {
+                "date": [
+                    "2000-01-02",
+                ],
+                "death": [30],
+                "STATEFP": [10],
+                "NAME": ["Delaware"],
+                "POPESTIMAT": [300000],
+                "deathsp100": [10.0],
+                "STUSPS": ["DE"],
+                "geometry": [Polygon([(0, 0), (1, 1), (1, 0)])],
+            }
+
+            actual = gpd.read_file(os.path.join(tmp, "TestMergedData"))
+            expected = gpd.GeoDataFrame(expected_merged_data)
+
+            pd.testing.assert_frame_equal(expected, actual)
+
+
+class VisualizingTests(TestCase):
+    pass
