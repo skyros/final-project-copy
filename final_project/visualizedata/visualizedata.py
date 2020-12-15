@@ -18,7 +18,7 @@ class VisualizedData(Task):
     requires = Requires()
     data = Requirement(MergedData)
     output = TargetOutput(
-        file_pattern=os.path.join("data", "{task.__class__.__name__}"),
+        file_pattern=os.path.join("{task.__class__.__name__}"),
         ext=".html",
         target_class=LocalTarget,
     )
@@ -36,6 +36,8 @@ class VisualizedData(Task):
             title="Total Covid Deaths Per 100 Thousand Population",
             x_axis_location=None,
             y_axis_location=None,
+            plot_width=1000,
+            plot_height=600,
         )
         p.grid.grid_line_color = None
 
@@ -45,6 +47,7 @@ class VisualizedData(Task):
             fill_color={"field": self.sort_by, "transform": color_mapper},
             line_color="black",
         )
+
         hovering = HoverTool()
         hovering.tooltips = [
             ("State", "@NAME"),

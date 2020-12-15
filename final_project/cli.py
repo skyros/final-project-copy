@@ -36,7 +36,8 @@ def main(args=None):
         local_scheduler=True,
     )
 
-    path = os.path.join(os.getcwd(), "data", "VisualizedData.html")
+    path = os.path.join(os.getcwd(), "VisualizedData.html")
+
     if os.path.exists(path):
         txt = "Output HTML File Located At:\n{}".format(path)
         print(txt, "\n")
@@ -44,7 +45,7 @@ def main(args=None):
         raise FileNotFoundError("Output File Does Not Exist")
 
     if args.open:
-        url = "file://" + os.path.join(os.getcwd(), "data", "VisualizedData.html")
+        url = "file://" + path
         webbrowser.open(url)
 
     if args.info:

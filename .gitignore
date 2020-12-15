@@ -1,5 +1,9 @@
+# Data Files
 data
 data_s3
+
+# Output
+VisualizedData.html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

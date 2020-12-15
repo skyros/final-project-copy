@@ -81,7 +81,7 @@ class ShapeFiles(ExternalTask):
     """
 
     output = TargetOutput(
-        file_pattern="data_s3/cb_2019_us_state_20m/",
+        file_pattern="shapefiles",
         ext="",
         target_class=LocalShapeFileTarget,
     )
