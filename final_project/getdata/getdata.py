@@ -1,7 +1,9 @@
 import os
 
+import dask.dataframe as dd
+import pandas as pd
 import requests
-from csci_utils.luigi.dask.target import CSVTarget
+from csci_utils.luigi.dask.target import CSVTarget, ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import ExternalTask, LocalTarget, Task
 
@@ -47,21 +49,27 @@ class DaskFSDailyCovidData(Task):
     )
 
 
-class StatePopulation(ExternalTask):
+class StatePopulation(Task):
     """
-    ExternalTask that gets state population data
+    Task that gets state population data
 
     Data From The US Census Bureau
-    https://www.census.gov/newsroom/press-kits/2019/national-state-estimates.html
+    https://www.census.gov/
     """
 
+    API_Path = "https://api.census.gov/data/2019/pep/population?get=COUNTY,POP,NAME&for=state:*"
     output = TargetOutput(
-        file_pattern="data_s3/state_data/",
+        file_pattern=os.path.join("data", "{task.__class__.__name__}/"),
         ext="",
-        target_class=CSVTarget,
-        flag=None,
-        glob="*.csv",
+        target_class=ParquetTarget,
+        glob="*.parquet",
     )
+
+    def run(self):
+        response = requests.get(self.API_Path)
+        df = pd.DataFrame(response.json()[1:], columns=response.json()[0])
+        ddf = dd.from_pandas(df, npartitions=1)
+        self.output().write_dask(ddf, compression="gzip")
 
 
 class ShapeFiles(ExternalTask):
