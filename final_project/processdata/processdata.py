@@ -175,7 +175,7 @@ class MergedData(Task):
         # Merge Dataframes
         df = pd.merge(pdf, gdf)
 
-        # Converting date back to str
+        # Converting date back to str as geopandas had trouble writing
         df[["date"]] = df[["date"]].astype(str)
 
         # Converting dataframe to geodataframe
