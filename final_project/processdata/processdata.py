@@ -139,6 +139,9 @@ class PopulationStats(Task):
         # Merge DataFrames
         ddf = covid_df.merge(pop_df)
 
+        # Take only the most recent date
+        ddf = ddf[ddf["date"] == ddf["date"].max()]
+
         # Calculate New Statistic for Deaths per 100 thousand people
         ddf["deathsp100k"] = ddf.apply(
             lambda x: x["death"] / x["POP"] * 100000,
@@ -167,9 +170,6 @@ class MergedData(Task):
         # Load DataFrames
         gdf = self.input()["shapefile"].read_gpd()
         ddf = self.input()["data"].read_dask()
-
-        # Take only the most recent date
-        ddf = ddf[ddf["date"] == ddf["date"].max()]
 
         # Unfortunately have to drop to Pandas here because dask does not play well with geopandas
         # However, most of the dataframe has been reduced so we have cut down on compute time
