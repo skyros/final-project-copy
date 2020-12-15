@@ -3,8 +3,7 @@ import os
 import geopandas
 from geopandas import read_file
 from luigi import LocalTarget
-
-# from luigi.contrib.s3 import S3Target
+from luigi.contrib.s3 import S3Target
 
 
 class ShapeFileTarget:
@@ -34,6 +33,7 @@ class LocalShapeFileTarget(ShapeFileTarget, LocalTarget):
     pass
 
 
-# class S3ShapeFileTarget(ShapeFileTarget, S3Target):
-#     """ShapeFileTarget and S3Target Mixin"""
-#     ##TODO
+class S3ShapeFileTarget(ShapeFileTarget, S3Target):
+    """ShapeFileTarget and S3Target Mixin"""
+
+    pass

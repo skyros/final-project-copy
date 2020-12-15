@@ -7,7 +7,7 @@ from csci_utils.luigi.dask.target import CSVTarget, ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import ExternalTask, LocalTarget, Task
 
-from ..utils import LocalShapeFileTarget
+from ..utils import S3ShapeFileTarget
 
 
 class DailyCovidData(Task):
@@ -74,14 +74,12 @@ class StatePopulation(Task):
 
 class ShapeFiles(ExternalTask):
     """
-    ExternalTask that gets state shapefiles
+    ExternalTask that gets state shapefiles from S3
 
     Data From The US Census Bureau
     https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html
     """
 
-    output = TargetOutput(
-        file_pattern="shapefiles",
-        ext="",
-        target_class=LocalShapeFileTarget,
-    )
+    S3_PATH = "s3://csci-e-29-skyros-project-data/shapefiles/"
+
+    output = TargetOutput(file_pattern=S3_PATH, ext="", target_class=S3ShapeFileTarget)

@@ -14,11 +14,11 @@ luigi = "*"
 geopandas = {extras = ["GeoDataFrame"], version = "*"}
 dask = {extras = ["dataframe"], version = "*"}
 fastparquet = "*"
-s3fs = "*"
 matplotlib = "*"
 descartes = "*"
 bokeh = "*"
 requests = "*"
+boto3 = "*"
 
 [requires]
 python_version = "3.7"
