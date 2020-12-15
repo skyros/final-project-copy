@@ -84,7 +84,7 @@ class CleaningTests(TestCase):
 
             build([TestCondensedShapeFile()], local_scheduler=True)
 
-            actual = gpd.read_file(os.path.join(target_path, "TestCondensedShapefile"))
+            actual = gpd.read_file(os.path.join(target_path, "TestCondensedShapeFile"))
             expected = gpd.GeoDataFrame(cleaned_data)
 
             # Check to see if Data is Clean
