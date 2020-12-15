@@ -114,3 +114,4 @@ venv.bak/
 # debug/dev
 junk*
 .pre-commit-config*
+.Rhistory

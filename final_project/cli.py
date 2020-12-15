@@ -36,6 +36,13 @@ def main(args=None):
         local_scheduler=True,
     )
 
+    path = os.path.join(os.getcwd(), "data", "VisualizedData.html")
+    if os.path.exists(path):
+        txt = "Output HTML File Located At:\n{}".format(path)
+        print(txt, "\n")
+    else:
+        raise FileNotFoundError("Output File Does Not Exist")
+
     if args.open:
         url = "file://" + os.path.join(os.getcwd(), "data", "VisualizedData.html")
         webbrowser.open(url)
@@ -48,4 +55,4 @@ def main(args=None):
         txt = "Data Current Through: {}\nRecorded United States Covid-19 Deaths: {}".format(
             date, tota_deaths
         )
-        print(txt)
+        print(txt, "\n")
