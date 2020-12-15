@@ -24,8 +24,8 @@ from final_project.getdata import (
 )
 from final_project.processdata import (
     CleanedCovidData,
+    CleanedStatePop,
     CondensedShapefile,
-    CondensedStatePop,
     MergedData,
     PopulationStats,
 )
@@ -90,41 +90,43 @@ class CleaningTests(TestCase):
             # Check to see if Data is Clean
             pd.testing.assert_frame_equal(expected, actual)
 
-    def test_pop_data(self):
+    @patch("requests.get")
+    def test_pop_data(self, API_Response):
         """Test Functionality of Population Data Tasks"""
 
         with TemporaryDirectory() as tmp:
-            data_path = os.path.join(tmp, "popdata")
 
             # Data to be Cleaned
-            data = {
-                "STATE": ["10", "15"],
-                "NAME": ["Delaware", "Hawaii"],
-                "POPESTIMATE2019": ["1234567", "1234567"],
-                "fake_category": ["test1", "test2"],
-            }
+            data = [
+                ["POP", "NAME", "state", "fake_category"],
+                ["1234567", "Delaware", "10", "test1"],
+                ["1234567", "Hawaii", "15", "test2"],
+            ]
 
             # What Data Should Look Like After Cleaning
             cleaned_data = {
-                "STATEFP": [10],
+                "POP": [1234567],
                 "NAME": ["Delaware"],
-                "POPESTIMATE2019": [1234567],
+                "STATEFP": [10],
             }
 
-            # # Writing Unlcean Data to File
-            df = pd.DataFrame(data)
-            df.to_csv(data_path + ".csv")
+            # Immitating Response Object
+            class MockedAPIResponse:
+                def json(self):
+                    return data
+
+            # Mock API Response
+            API_Response.return_value = MockedAPIResponse()
 
             class TestStatePopulation(StatePopulation):
                 output = TargetOutput(
-                    file_pattern=tmp + "/",
+                    file_pattern=os.path.join(tmp, "{task.__class__.__name__}/"),
                     ext="",
-                    target_class=CSVTarget,
-                    flag=None,
-                    glob="*.csv",
+                    target_class=ParquetTarget,
+                    glob="*.parquet",
                 )
 
-            class TestCondensedStatePop(CondensedStatePop):
+            class TestCleanedStatePop(CleanedStatePop):
 
                 requires = Requires()
                 populations = Requirement(TestStatePopulation)
@@ -135,12 +137,13 @@ class CleaningTests(TestCase):
                     glob="*.parquet",
                 )
 
-            build([TestCondensedStatePop()], local_scheduler=True)
+            build([TestCleanedStatePop()], local_scheduler=True)
 
-            actual = dd.read_parquet(
-                os.path.join(tmp, "TestCondensedStatePop")
-            ).compute()
+            actual = dd.read_parquet(os.path.join(tmp, "TestCleanedStatePop")).compute()
             expected = pd.DataFrame(cleaned_data)
+
+            print(actual)
+            print(expected)
 
             # Checks to see if the Data Processed is Correct
             pd.testing.assert_frame_equal(expected, actual)
@@ -270,7 +273,7 @@ class MergingTests(TestCase):
             pop_data = {
                 "STATEFP": [10],
                 "NAME": ["Delaware"],
-                "POPESTIMATE2019": [300000],
+                "POP": [300000],
             }
 
             covid_data = {
@@ -361,7 +364,7 @@ class MergingTests(TestCase):
                 "death": [30],
                 "STATEFP": [10],
                 "NAME": ["Delaware"],
-                "POPESTIMAT": [300000],
+                "POP": [300000],
                 "deathsp100": [10.0],
                 "STUSPS": ["DE"],
                 "geometry": [Polygon([(0, 0), (1, 1), (1, 0)])],
@@ -387,7 +390,7 @@ class VisualizingTests(TestCase):
                 "death": [30],
                 "STATEFP": [10],
                 "NAME": ["Delaware"],
-                "POPESTIMAT": [300000],
+                "POP": [300000],
                 "deathsp100": [10.0],
                 "STUSPS": ["DE"],
                 "geometry": [Polygon([(0, 0), (1, 1), (1, 0)])],
