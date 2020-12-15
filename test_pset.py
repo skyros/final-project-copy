@@ -3,7 +3,6 @@
 
 """Tests for `final_project` package."""
 
-import csv
 import os
 from tempfile import TemporaryDirectory
 from unittest import TestCase
@@ -32,10 +31,6 @@ from final_project.processdata import (
 )
 from final_project.utils import LocalShapeFileTarget
 from final_project.visualizedata import VisualizedData
-
-# remove, placeholders for later
-VisualizedData
-csv
 
 
 class CleaningTests(TestCase):
@@ -255,6 +250,7 @@ class CleaningTests(TestCase):
 
 class MergingTests(TestCase):
     def test_merge(self):
+        """Tests Dataframe Merges"""
         with TemporaryDirectory() as tmp:
             # Making Testing File Directory
             geo_file = os.path.join(tmp, "geo")
@@ -351,10 +347,38 @@ class MergingTests(TestCase):
                     ext="",
                 )
 
+            # Running Test Tasks
             build(
                 [TestMergedData()],
                 local_scheduler=True,
             )
+
+            # Expected Data
+            expected_merged_data = {
+                "date": [
+                    "2000-01-02",
+                ],
+                "death": [30],
+                "STATEFP": [10],
+                "NAME": ["Delaware"],
+                "POPESTIMAT": [300000],
+                "deathsp100": [10.0],
+                "STUSPS": ["DE"],
+                "geometry": [Polygon([(0, 0), (1, 1), (1, 0)])],
+            }
+
+            # Comparing Expected/Actual Dataframes
+            actual = gpd.read_file(os.path.join(tmp, "TestMergedData"))
+            expected = gpd.GeoDataFrame(expected_merged_data)
+
+            pd.testing.assert_frame_equal(expected, actual)
+
+
+class VisualizingTests(TestCase):
+    def test_visualize(self):
+        """Tests Data Visualization Task for Output"""
+        with TemporaryDirectory() as tmp:
+            merge_folder = os.path.join(tmp, "merged")
 
             expected_merged_data = {
                 "date": [
@@ -369,11 +393,31 @@ class MergingTests(TestCase):
                 "geometry": [Polygon([(0, 0), (1, 1), (1, 0)])],
             }
 
-            actual = gpd.read_file(os.path.join(tmp, "TestMergedData"))
-            expected = gpd.GeoDataFrame(expected_merged_data)
+            gdf = gpd.GeoDataFrame(expected_merged_data)
+            os.makedirs(merge_folder)
+            gdf.to_file(merge_folder)
 
-            pd.testing.assert_frame_equal(expected, actual)
+            class TestMergedData(ExternalTask):
+                output = TargetOutput(
+                    file_pattern=merge_folder,
+                    target_class=LocalShapeFileTarget,
+                    ext="",
+                )
 
+            class TestVisualizedData(VisualizedData):
+                requires = Requires()
+                data = Requirement(TestMergedData)
+                output = TargetOutput(
+                    file_pattern=os.path.join(tmp, "{task.__class__.__name__}"),
+                    ext=".html",
+                    target_class=LocalTarget,
+                )
 
-class VisualizingTests(TestCase):
-    pass
+            build(
+                [TestVisualizedData()],
+                local_scheduler=True,
+            )
+
+            self.assertTrue(
+                os.path.exists(os.path.join(tmp, "TestVisualizedData.html"))
+            )
