@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import dask.dataframe as dd
@@ -18,8 +19,9 @@ class DailyCovidData(Task):
     https://covidtracking.com/
     """
 
+    SALT = str(datetime.date.today())
     API_Path = "https://api.covidtracking.com/v1/states/daily.csv"
-    SHARED_DIRECTORY = os.path.join("data", "DailyCovidData")
+    SHARED_DIRECTORY = os.path.join("data", SALT, "DailyCovidData")
 
     output = TargetOutput(
         file_pattern=os.path.join(SHARED_DIRECTORY, "0"),
@@ -36,7 +38,8 @@ class DailyCovidData(Task):
 class DaskFSDailyCovidData(Task):
     """A little bit of a hack - Task that reclassifies the existing path as a dask CSVTarget"""
 
-    SHARED_DIRECTORY = os.path.join("data", "DailyCovidData")
+    SALT = str(datetime.date.today())
+    SHARED_DIRECTORY = os.path.join("data", SALT, "DailyCovidData")
     requires = Requires()
     covid_data = Requirement(DailyCovidData)
 

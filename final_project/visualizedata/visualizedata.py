@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from bokeh.models import GeoJSONDataSource, HoverTool, LinearColorMapper
@@ -14,11 +15,12 @@ class VisualizedData(Task):
     """Takes a GeoPandas shapefile and visualizes the data using Bokeh"""
 
     sort_by = "deathsp100"
+    SALT = str(datetime.date.today())
 
     requires = Requires()
     data = Requirement(MergedData)
     output = TargetOutput(
-        file_pattern=os.path.join("{task.__class__.__name__}"),
+        file_pattern=os.path.join("{task.__class__.__name__}-" + SALT),
         ext=".html",
         target_class=BokehTarget,
     )

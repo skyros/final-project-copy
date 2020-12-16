@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import geopandas as gp
@@ -72,10 +73,12 @@ class CleanedStatePop(Task):
 class CleanedCovidData(Task):
     """Selects Relevant Rows and Cleans Covid Data"""
 
+    SALT = str(datetime.date.today())
+
     requires = Requires()
     covid_numbers = Requirement(DaskFSDailyCovidData)
     output = TargetOutput(
-        file_pattern=os.path.join("data", "{task.__class__.__name__}/"),
+        file_pattern=os.path.join("data", SALT, "{task.__class__.__name__}/"),
         ext="",
         target_class=ParquetTarget,
         glob="*.parquet",
@@ -120,12 +123,14 @@ class CleanedCovidData(Task):
 class PopulationStats(Task):
     """Normalizes Statistics to State Population"""
 
+    SALT = str(datetime.date.today())
+
     requires = Requires()
     covid_data = Requirement(CleanedCovidData)
     state_populations = Requirement(CleanedStatePop)
 
     output = TargetOutput(
-        file_pattern=os.path.join("data", "{task.__class__.__name__}/"),
+        file_pattern=os.path.join("data", SALT, "{task.__class__.__name__}/"),
         ext="",
         target_class=ParquetTarget,
         glob="*.parquet",
@@ -156,12 +161,14 @@ class PopulationStats(Task):
 class MergedData(Task):
     """Merges the normalized statistics with the GeoPandas shapefile"""
 
+    SALT = str(datetime.date.today())
+
     requires = Requires()
     data = Requirement(PopulationStats)
     shapefile = Requirement(CondensedShapefile)
 
     output = TargetOutput(
-        file_pattern=os.path.join("data", "{task.__class__.__name__}"),
+        file_pattern=os.path.join("data", SALT, "{task.__class__.__name__}"),
         target_class=LocalShapeFileTarget,
         ext="",
     )
