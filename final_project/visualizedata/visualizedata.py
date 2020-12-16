@@ -1,4 +1,3 @@
-import datetime
 import os
 
 from bokeh.models import GeoJSONDataSource, HoverTool, LinearColorMapper
@@ -8,14 +7,15 @@ from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import Task
 
 from ..processdata import MergedData
-from ..utils import BokehTarget
+from ..utils import BokehTarget, Salter
 
 
 class VisualizedData(Task):
     """Takes a GeoPandas shapefile and visualizes the data using Bokeh"""
 
     sort_by = "deathsp100"
-    SALT = str(datetime.date.today())
+    salter = Salter()
+    SALT = salter.date_salt()
 
     requires = Requires()
     data = Requirement(MergedData)

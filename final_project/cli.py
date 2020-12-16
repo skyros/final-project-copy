@@ -1,11 +1,11 @@
 import argparse
-import datetime
 import os
 import webbrowser
 
 import dask.dataframe as dd
 from luigi import build
 
+from .utils import Salter
 from .visualizedata import VisualizedData
 
 parser = argparse.ArgumentParser(
@@ -30,7 +30,8 @@ parser.add_argument(
 
 def main(args=None):
 
-    SALT = str(datetime.date.today())
+    salter = Salter()
+    SALT = salter.date_salt()
     args = parser.parse_args()
 
     build(

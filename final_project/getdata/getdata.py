@@ -1,4 +1,3 @@
-import datetime
 import os
 
 import dask.dataframe as dd
@@ -8,7 +7,7 @@ from csci_utils.luigi.dask.target import CSVTarget, ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import ExternalTask, LocalTarget, Task
 
-from ..utils import LocalShapeFileTarget, S3ShapeFileTarget
+from ..utils import LocalShapeFileTarget, S3ShapeFileTarget, Salter
 
 
 class DailyCovidData(Task):
@@ -19,7 +18,8 @@ class DailyCovidData(Task):
     https://covidtracking.com/
     """
 
-    SALT = str(datetime.date.today())
+    salter = Salter()
+    SALT = salter.date_salt()
     API_Path = "https://api.covidtracking.com/v1/states/daily.csv"
     SHARED_DIRECTORY = os.path.join("data", SALT, "DailyCovidData")
 
@@ -38,7 +38,8 @@ class DailyCovidData(Task):
 class DaskFSDailyCovidData(Task):
     """A little bit of a hack - Task that reclassifies the existing path as a dask CSVTarget"""
 
-    SALT = str(datetime.date.today())
+    salter = Salter()
+    SALT = salter.date_salt()
     SHARED_DIRECTORY = os.path.join("data", SALT, "DailyCovidData")
     requires = Requires()
     covid_data = Requirement(DailyCovidData)

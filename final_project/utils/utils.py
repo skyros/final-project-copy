@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import geopandas
@@ -38,3 +39,10 @@ class BokehTarget(LocalTarget):
     def save_bokeh(self, figure, **kwargs):
         output_file(self.path)
         save(figure)
+
+
+class Salter:
+    """Class With Methods that Return Basic Salts From Different Metrics as Strings"""
+
+    def date_salt(self):
+        return str(datetime.date.today())
