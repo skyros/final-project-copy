@@ -32,17 +32,17 @@ class VisualizedData(Task):
         gjdf = gdf.to_json()
         source = GeoJSONDataSource(geojson=gjdf)
 
-        p = figure(
+        fig = figure(
             title="Total Covid Deaths Per 100 Thousand Population",
             x_axis_location=None,
             y_axis_location=None,
             plot_width=1000,
             plot_height=600,
         )
-        p.grid.grid_line_color = None
+        fig.grid.grid_line_color = None
 
         color_mapper = LinearColorMapper(palette=palette[8], low=low, high=high)
-        p.patches(
+        fig.patches(
             source=source,
             fill_color={"field": self.sort_by, "transform": color_mapper},
             line_color="black",
@@ -54,5 +54,5 @@ class VisualizedData(Task):
             ("Covid-19 Deaths", "@death"),
             ("Covid-19 Deaths per 100k", "@deathsp100"),
         ]
-        p.add_tools(hovering)
-        self.output().save_bokeh(p)
+        fig.add_tools(hovering)
+        self.output().save_bokeh(fig)
