@@ -47,7 +47,7 @@ For my CSCI E-29 Final Project, I chose to build a Luigi Pipeline to visualize C
 
 <foreignobject>
 
-<img src="example/example.png">
+<img src="img/example.png">
 
 #### *A Note About The Shapefile Data:*
 
@@ -62,6 +62,50 @@ My overall goals when starting this project were as follows:
 - Use Dask to do lazy data processing as much as possible.
 - Dig into Bokeh and practice with some of the visualization techniques and technologies introduced late in CSCI E-29.
 - Find good opportunities to incorporate techniques and technologies learned in CSCI E-29 and solidify my understanding of them.
+
+## Navigating This Project
+
+The link to my presentation on this project can be found [here](https://youtu.be/3eRj5aOY21k). It gives a general overview of the project structure and features.
+
+### The Luigi Tasks follow this DAG:
+
+<img src="img/DAG.png">
+
+### Luigi Pipeline Tasks/Files
+
+Below is an overview of the Tasks in my Luigi pipleline with the files they are contained within. I included a brief summary of what each task does.
+
+#### Get Data Tasks - [getdata.py](final_project/getdata/getdata.py)
+
+- `DailyCovidData` - Get Covid-19 Data from API, Saves to csv.
+- `DaskFSDailyCovidData` - Sets Up the Covid-19 csv file to be Picked up as a Dask CSVTarget.
+- `StatePopulation` - Gets State Population Data From API.
+- `ShapeFiles` - Get Shapefiles from S3.
+- `LocalShapeFiles` - Saves Shapefiles Locally.
+
+#### Clean/Merge Data Tasks - [processdata.py](final_project/processdata/processdata.py)
+
+- Cleaning Tasks
+    - `CondensedShapefile` - Cleans Shapefile.
+    - `CleanedStatePop` - Cleans Population Data.
+    - `CleanedCovidData` - Cleans Covid Data.
+- Merging Tasks
+    - `PopulationStats` - Merges Population Data with Covid Data.
+    - `MergedData` - Merges Population/Covid Data with Shapefile.
+
+#### Visualize Data Tasks - [visualizedata.py](final_project/visualizedata/visualizedata.py)
+
+- `VisualizedData` - Visualizes Data.
+
+### Utils/Testing Files
+
+I dive a little more in depth with these files below but I will provide them here. Utils has Luigi targets I wrote for Shapefile Targets as well as the Salter class.
+
+- [utils.py](final_project/utils/utils.py)
+
+I also wrote some fairly extensive tests here.
+
+- [test_pset.py](test_pset.py)
 
 ## Advanced Python Highlights
 
