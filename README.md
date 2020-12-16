@@ -8,7 +8,7 @@ Geospatial Data Visualization of Covid-19 Data Using GeoPandas, Luigi, Dask, and
 
 ## Installation
 
-Use [pipenv](https://pypi.org/project/pipenv/) to install the project dependencies.
+After downloading the project, use [pipenv](https://pypi.org/project/pipenv/) to install the project dependencies.
 
 ```bash
 pipenv install
