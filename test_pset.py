@@ -19,6 +19,7 @@ from shapely.geometry import Polygon
 from final_project.getdata import (
     DailyCovidData,
     DaskFSDailyCovidData,
+    LocalShapeFiles,
     ShapeFiles,
     StatePopulation,
 )
@@ -29,7 +30,7 @@ from final_project.processdata import (
     MergedData,
     PopulationStats,
 )
-from final_project.utils import LocalShapeFileTarget
+from final_project.utils import BokehTarget, LocalShapeFileTarget
 from final_project.visualizedata import VisualizedData
 
 
@@ -72,10 +73,20 @@ class CleaningTests(TestCase):
                     target_class=LocalShapeFileTarget,
                 )
 
+            # Just Inserted This Task Here For Coverage
+            class TestLocalShapeFiles(LocalShapeFiles):
+                requires = Requires()
+                s3_data = Requirement(TestShapeFiles)
+                output = TargetOutput(
+                    file_pattern=os.path.join(tmp, "shapefiles"),
+                    target_class=LocalShapeFileTarget,
+                    ext="",
+                )
+
             class TestCondensedShapeFile(CondensedShapefile):
 
                 requires = Requires()
-                shapefile = Requirement(TestShapeFiles)
+                shapefile = Requirement(TestLocalShapeFiles)
                 output = TargetOutput(
                     file_pattern=os.path.join(target_path, "{task.__class__.__name__}"),
                     target_class=LocalShapeFileTarget,
@@ -413,7 +424,7 @@ class VisualizingTests(TestCase):
                 output = TargetOutput(
                     file_pattern=os.path.join(tmp, "{task.__class__.__name__}"),
                     ext=".html",
-                    target_class=LocalTarget,
+                    target_class=BokehTarget,
                 )
 
             build(

@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import dask.dataframe as dd
@@ -7,7 +8,7 @@ from csci_utils.luigi.dask.target import CSVTarget, ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import ExternalTask, LocalTarget, Task
 
-from ..utils import S3ShapeFileTarget
+from ..utils import LocalShapeFileTarget, S3ShapeFileTarget
 
 
 class DailyCovidData(Task):
@@ -18,8 +19,9 @@ class DailyCovidData(Task):
     https://covidtracking.com/
     """
 
+    SALT = str(datetime.date.today())
     API_Path = "https://api.covidtracking.com/v1/states/daily.csv"
-    SHARED_DIRECTORY = os.path.join("data", "DailyCovidData")
+    SHARED_DIRECTORY = os.path.join("data", SALT, "DailyCovidData")
 
     output = TargetOutput(
         file_pattern=os.path.join(SHARED_DIRECTORY, "0"),
@@ -36,7 +38,8 @@ class DailyCovidData(Task):
 class DaskFSDailyCovidData(Task):
     """A little bit of a hack - Task that reclassifies the existing path as a dask CSVTarget"""
 
-    SHARED_DIRECTORY = os.path.join("data", "DailyCovidData")
+    SALT = str(datetime.date.today())
+    SHARED_DIRECTORY = os.path.join("data", SALT, "DailyCovidData")
     requires = Requires()
     covid_data = Requirement(DailyCovidData)
 
@@ -83,3 +86,23 @@ class ShapeFiles(ExternalTask):
     S3_PATH = "s3://csci-e-29-skyros-project-data/shapefiles/"
 
     output = TargetOutput(file_pattern=S3_PATH, ext="", target_class=S3ShapeFileTarget)
+
+
+class LocalShapeFiles(Task):
+    """
+    Task That Takes S3 Target and Saves Locally
+    This is here to allow the Pipeline to Run Without Access to my S3 Buckets
+    """
+
+    requires = Requires()
+    s3_data = Requirement(ShapeFiles)
+    output = TargetOutput(
+        file_pattern="shapefiles",
+        target_class=LocalShapeFileTarget,
+        ext="",
+    )
+
+    def run(self):
+        # Reads Input Writes Output
+        gdf = self.input()["s3_data"].read_gpd()
+        self.output().write_gpd(gdf)

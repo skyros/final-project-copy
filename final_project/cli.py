@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import os
 import webbrowser
 
@@ -29,6 +30,7 @@ parser.add_argument(
 
 def main(args=None):
 
+    SALT = str(datetime.date.today())
     args = parser.parse_args()
 
     build(
@@ -36,7 +38,7 @@ def main(args=None):
         local_scheduler=True,
     )
 
-    path = os.path.join(os.getcwd(), "VisualizedData.html")
+    path = os.path.join(os.getcwd(), "VisualizedData-{}.html".format(SALT))
 
     if os.path.exists(path):
         txt = "Output HTML File Located At:\n{}".format(path)
