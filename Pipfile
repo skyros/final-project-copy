@@ -14,8 +14,6 @@ luigi = "*"
 geopandas = {extras = ["GeoDataFrame"], version = "*"}
 dask = {extras = ["dataframe"], version = "*"}
 fastparquet = "*"
-matplotlib = "*"
-descartes = "*"
 bokeh = "*"
 requests = "*"
 boto3 = "*"
