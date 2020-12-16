@@ -1,4 +1,3 @@
-import datetime
 import os
 
 import geopandas as gp
@@ -8,7 +7,7 @@ from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import Task
 
 from ..getdata import DaskFSDailyCovidData, LocalShapeFiles, StatePopulation
-from ..utils import LocalShapeFileTarget
+from ..utils import LocalShapeFileTarget, Salter
 
 
 class CondensedShapefile(Task):
@@ -73,7 +72,8 @@ class CleanedStatePop(Task):
 class CleanedCovidData(Task):
     """Selects Relevant Rows and Cleans Covid Data"""
 
-    SALT = str(datetime.date.today())
+    salter = Salter()
+    SALT = salter.date_salt()
 
     requires = Requires()
     covid_numbers = Requirement(DaskFSDailyCovidData)
@@ -123,7 +123,8 @@ class CleanedCovidData(Task):
 class PopulationStats(Task):
     """Normalizes Statistics to State Population"""
 
-    SALT = str(datetime.date.today())
+    salter = Salter()
+    SALT = salter.date_salt()
 
     requires = Requires()
     covid_data = Requirement(CleanedCovidData)
@@ -161,7 +162,8 @@ class PopulationStats(Task):
 class MergedData(Task):
     """Merges the normalized statistics with the GeoPandas shapefile"""
 
-    SALT = str(datetime.date.today())
+    salter = Salter()
+    SALT = salter.date_salt()
 
     requires = Requires()
     data = Requirement(PopulationStats)
