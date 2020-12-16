@@ -19,14 +19,6 @@ class ShapeFileTarget:
             os.makedirs(self.path)
         return geopandas.GeoDataFrame.to_file(dataframe, self.path, **kwargs)
 
-    # @classmethod
-    # def _read(cls, path, **kwargs):
-    #     return read_file(path, **kwargs)
-
-    # @classmethod
-    # def _write(cls, dataframe, path, **kwargs):
-    #     return geopandas.GeoDataFrame.to_file(dataframe, path, **kwargs)
-
 
 class LocalShapeFileTarget(ShapeFileTarget, LocalTarget):
     """ShapeFileTarget and LocalTarget Mixin"""
