@@ -57,7 +57,7 @@ As there is no API for shapefiles at the US Census Bureau, the files had to be d
 
 My overall goals when starting this project were as follows:
 
-- Create a working geographical data visualization Luigi pipeline
+- Create a working geographical data visualization Luigi pipeline.
 - Use Python as glue to tie together multiple technologies.
 - Use Dask to do lazy data processing as much as possible.
 - Dig into Bokeh and practice with some of the visualization techniques and technologies introduced late in CSCI E-29.
@@ -103,6 +103,7 @@ These include:
 - Use of Luigi/CLI Parameters to give this project more of a 'tool' feeling.
 - Expanding on the `Salter` class as a quick way to generate salted outputs tied to a given metric (eg date/time).
 - Finding ways to generalize/restructure the existing Luigi tasks for different data source inputs.
+- Do more with the living data aspect of the project.
 
 
 ## Conclusion/Acknowledgements
