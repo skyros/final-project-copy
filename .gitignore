@@ -3,7 +3,7 @@ data
 data_s3
 
 # Output
-VisualizedData.html
+VisualizedData*.html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
