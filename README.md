@@ -45,7 +45,9 @@ pipenv run python -m final_project [-h] [-i] [-o]
 
 For my CSCI E-29 Final Project, I chose to build a Luigi Pipeline to visualize Covid-19 geographically. The pipeline uses API calls to The Covid Tracking Project and The US Census Bureau as data sources and as such uses up to date datasets. The data is then condensed, cleaned, merged, and eventually visualized with Bokeh to produce an interactive HTML file similar to what is seen below.
 
-##TODO [Insert Image]
+<foreignobject>
+
+<img src="example/example.png">
 
 #### *A Note About The Shapefile Data:*
 
