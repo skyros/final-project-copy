@@ -1,13 +1,13 @@
 import os
 
-from bokeh.io import output_file, save
 from bokeh.models import GeoJSONDataSource, HoverTool, LinearColorMapper
 from bokeh.palettes import YlOrRd as palette
 from bokeh.plotting import figure
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
-from luigi import LocalTarget, Task
+from luigi import Task
 
 from ..processdata import MergedData
+from ..utils import BokehTarget
 
 
 class VisualizedData(Task):
@@ -20,7 +20,7 @@ class VisualizedData(Task):
     output = TargetOutput(
         file_pattern=os.path.join("{task.__class__.__name__}"),
         ext=".html",
-        target_class=LocalTarget,
+        target_class=BokehTarget,
     )
 
     def run(self):
@@ -55,5 +55,4 @@ class VisualizedData(Task):
             ("Covid-19 Deaths per 100k", "@deathsp100"),
         ]
         p.add_tools(hovering)
-        output_file(self.output().path)
-        save(p)
+        self.output().save_bokeh(p)
