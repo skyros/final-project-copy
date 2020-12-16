@@ -6,7 +6,7 @@ from csci_utils.luigi.dask import ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import Task
 
-from ..getdata import DaskFSDailyCovidData, ShapeFiles, StatePopulation
+from ..getdata import DaskFSDailyCovidData, LocalShapeFiles, StatePopulation
 from ..utils import LocalShapeFileTarget
 
 
@@ -14,7 +14,7 @@ class CondensedShapefile(Task):
     """Selects Relevent Shapefile Columns/Rows and Saves Locally"""
 
     requires = Requires()
-    shapefile = Requirement(ShapeFiles)
+    shapefile = Requirement(LocalShapeFiles)
     output = TargetOutput(
         file_pattern=os.path.join("data", "{task.__class__.__name__}"),
         target_class=LocalShapeFileTarget,

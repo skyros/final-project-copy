@@ -7,7 +7,7 @@ from csci_utils.luigi.dask.target import CSVTarget, ParquetTarget
 from csci_utils.luigi.task import Requirement, Requires, TargetOutput
 from luigi import ExternalTask, LocalTarget, Task
 
-from ..utils import S3ShapeFileTarget
+from ..utils import LocalShapeFileTarget, S3ShapeFileTarget
 
 
 class DailyCovidData(Task):
@@ -83,3 +83,23 @@ class ShapeFiles(ExternalTask):
     S3_PATH = "s3://csci-e-29-skyros-project-data/shapefiles/"
 
     output = TargetOutput(file_pattern=S3_PATH, ext="", target_class=S3ShapeFileTarget)
+
+
+class LocalShapeFiles(Task):
+    """
+    Task That Takes S3 Target and Saves Locally
+    This is here to allow the Pipeline to Run Without Access to my S3 Buckets
+    """
+
+    requires = Requires()
+    s3_data = Requirement(ShapeFiles)
+    output = TargetOutput(
+        file_pattern="shapefiles",
+        target_class=LocalShapeFileTarget,
+        ext="",
+    )
+
+    def run(self):
+        # Reads Input Writes Output
+        gdf = self.input()["s3_data"].read_gpd()
+        self.output().write_gpd(gdf)
