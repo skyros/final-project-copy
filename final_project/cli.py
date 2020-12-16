@@ -51,7 +51,9 @@ def main(args=None):
         webbrowser.open(url)
 
     if args.info:
-        ddf = dd.read_parquet("data/PopulationStats", columns=["date", "death"])
+        ddf = dd.read_parquet(
+            os.path.join("data", SALT, "PopulationStats"), columns=["date", "death"]
+        )
         df = ddf.groupby("date").sum().compute()
         date = df.index[0].strftime("%B %d, %Y")
         tota_deaths = df.iloc[0][0]
