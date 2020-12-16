@@ -78,7 +78,7 @@ Below is an overview of the Tasks in my Luigi pipleline with the files they are 
 #### Get Data Tasks - [getdata.py](final_project/getdata/getdata.py)
 
 - `DailyCovidData` - Get Covid-19 Data from API, Saves to csv.
-- `DaskFSDailyCovidData` - Sets Up the Covid-19 csv file to be Picked up as a Dask CSVTarget.
+- `DaskFSDailyCovidData` - Sets Up the Covid-19 csv file as a Dask Filesystem to be picked up as a Dask CSVTarget.
 - `StatePopulation` - Gets State Population Data From API.
 - `ShapeFiles` - Get Shapefiles from S3.
 - `LocalShapeFiles` - Saves Shapefiles Locally.
