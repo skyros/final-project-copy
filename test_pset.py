@@ -30,7 +30,7 @@ from final_project.processdata import (
     MergedData,
     PopulationStats,
 )
-from final_project.utils import LocalShapeFileTarget
+from final_project.utils import BokehTarget, LocalShapeFileTarget
 from final_project.visualizedata import VisualizedData
 
 
@@ -424,7 +424,7 @@ class VisualizingTests(TestCase):
                 output = TargetOutput(
                     file_pattern=os.path.join(tmp, "{task.__class__.__name__}"),
                     ext=".html",
-                    target_class=LocalTarget,
+                    target_class=BokehTarget,
                 )
 
             build(
