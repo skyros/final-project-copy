@@ -43,7 +43,7 @@ pipenv run python -m final_project [-h] [-i] [-o]
 
 ### Summary
 
-For my CSCI E-29 Final Project, I chose to build a Luigi Pipeline to visualize Covid-19 geographically. The pipeline uses API calls to The Covid Tracking Project and The US Census Bureau as data sources and as such uses up to date datasets. The data is then condensed, cleaned, merged, and eventually visualized with Bokeh to produce an interactive HTML file similar to what is seen below.
+For my Final Project, I chose to build a Luigi Pipeline to visualize Covid-19 geographically. The pipeline uses API calls to The Covid Tracking Project and The US Census Bureau as data sources and as such uses up to date datasets. The data is then condensed, cleaned, merged, and eventually visualized with Bokeh to produce an interactive HTML file similar to what is seen below.
 
 <foreignobject>
 
@@ -60,8 +60,8 @@ My overall goals when starting this project were as follows:
 - Create a working geographical data visualization Luigi pipeline.
 - Use Python as glue to tie together multiple technologies.
 - Use Dask to do lazy data processing as much as possible.
-- Dig into Bokeh and practice with some of the visualization techniques and technologies introduced late in CSCI E-29.
-- Find good opportunities to incorporate techniques and technologies learned in CSCI E-29 and solidify my understanding of them.
+- Dig into Bokeh and practice with some of the visualization techniques and technologies introduced late in the course.
+- Find good opportunities to incorporate techniques and technologies learned in the course and solidify my understanding of them.
 
 ## Navigating This Project
 
